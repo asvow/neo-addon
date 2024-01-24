@@ -23,7 +23,7 @@ msgstr "基礎設定"
 msgid "Collecting data ..."
 msgstr "收集資料中..."
 
-#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:85
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:94
 msgid ""
 "Create or manage your ZeroTier network, and auth clients who could access."
 msgstr "新建或管理您的 ZeroTier 網路，並授權用戶端訪問"
@@ -76,7 +76,7 @@ msgstr "網路介面資訊"
 msgid "No interface online."
 msgstr "沒有介面在線上。"
 
-#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:86
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:95
 msgid "Open website"
 msgstr "開啟網站"
 
@@ -108,7 +108,7 @@ msgstr "無法取得介面資訊：%s"
 msgid "ZeroTier"
 msgstr "ZeroTier"
 
-#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:84
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:93
 msgid "ZeroTier Central"
 msgstr "ZeroTier 管理中心"
 
@@ -116,3 +116,23 @@ msgstr "ZeroTier 管理中心"
 #: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/interface.js:74
 msgid "ZeroTier is an open source, cross-platform and easy to use virtual LAN."
 msgstr "ZeroTier 是一個開源、跨平台且易於使用的虛擬區域網路 VPN"
+
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:84
+msgid "Access Control"
+msgstr "訪問控制"
+
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:85
+msgid "Zerotier access LAN"
+msgstr "虛擬區域網路訪問本地區域網路"
+
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:86
+msgid "Zerotier access WAN"
+msgstr "虛擬區域網路訪問本地廣域網路"
+
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:87
+msgid "LAN access Zerotier"
+msgstr "本地區域網路訪問虛擬區域網路"
+
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:88
+msgid "WAN access Zerotier"
+msgstr "本地廣域網路訪問虛擬區域網路"

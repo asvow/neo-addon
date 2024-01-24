@@ -17,7 +17,7 @@ msgstr ""
 msgid "Collecting data ..."
 msgstr ""
 
-#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:85
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:94
 msgid ""
 "Create or manage your ZeroTier network, and auth clients who could access."
 msgstr ""
@@ -70,7 +70,7 @@ msgstr ""
 msgid "No interface online."
 msgstr ""
 
-#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:86
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:95
 msgid "Open website"
 msgstr ""
 
@@ -102,11 +102,31 @@ msgstr ""
 msgid "ZeroTier"
 msgstr ""
 
-#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:84
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:93
 msgid "ZeroTier Central"
 msgstr ""
 
 #: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:53
 #: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/interface.js:74
 msgid "ZeroTier is an open source, cross-platform and easy to use virtual LAN."
+msgstr ""
+
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:84
+msgid "Access Control"
+msgstr ""
+
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:85
+msgid "Zerotier access LAN"
+msgstr ""
+
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:86
+msgid "Zerotier access WAN"
+msgstr ""
+
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:87
+msgid "LAN access Zerotier"
+msgstr ""
+
+#: applications/luci-app-zerotier/htdocs/luci-static/resources/view/zerotier/base.js:88
+msgid "WAN access Zerotier"
 msgstr ""

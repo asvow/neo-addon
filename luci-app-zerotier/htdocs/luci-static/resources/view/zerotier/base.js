@@ -80,6 +80,15 @@ return view.extend({
 			_('Allow ZeroTier clients access your LAN network.'));
 		o.default = o.disabled;
 		o.rmempty = false;
+		
+		o = s.option(form.MultiValue, 'access', _('Access Control'));
+		o.value('ztfwlan', _('Zerotier access LAN'));
+		o.value('ztfwwan', _('Zerotier access WAN'));
+		o.value('lanfwzt', _('LAN access Zerotier'));
+		o.value('wanfwzt', _('WAN access Zerotier'));
+		o.default = "ztfwlan ztfwwan lanfwzt";
+		o.depends('nat', '1');
+		o.rmempty = false;
 
 		o = s.option(form.Button, '_panel', _('ZeroTier Central'),
 			_('Create or manage your ZeroTier network, and auth clients who could access.'));
