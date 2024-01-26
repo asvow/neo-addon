@@ -1,0 +1,137 @@
+name: Build Package
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        description: 'build target package'
+        options:
+        - luci-app-adguardhome
+        - luci-app-dockerman
+        - luci-app-zerotier
+        default: ''
+        required: true
+      platform:
+        type: choice
+        description: 'build target platform'
+        options:
+        - arm64
+        - x64
+        - mipsel
+        default: 'arm64'
+        required: true
+
+env:
+  TARGET: ${{ github.event.inputs.target }}
+  PLATFORM: ${{ github.event.inputs.platform }}
+
+jobs:
+
+  build_packages:
+    name: Build ${{ github.event.inputs.target }}
+    runs-on: ubuntu-22.04
+    env:
+      UPLOAD_RELEASE: true
+      TZ: Asia/Shanghai
+    if: github.repository_owner=='asvow'
+    outputs:
+      OPENWRTROOT: ${{ steps.update.outputs.OPENWRTROOT }}
+      FIRMWARE: ${{ steps.compile.outputs.FIRMWARE }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+ 
+    - name: Import Env
+      run: |
+        cat .github/workflows/$PLATFORM.env >> "$GITHUB_ENV"
+
+    - name: Download & Unpack SDK
+      run: |
+        wget ${SDK_URL}${SDK_NAME}.tar.xz
+        mkdir openwrt
+        tar -xJf ${SDK_NAME}.tar.xz --strip-components=1 -C openwrt
+        cd openwrt
+        echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
+
+    - name: Clean Code
+      run: |
+        rm -rf ${OPENWRTROOT}/package/kernel/linux/modules/*
+        grep -lFr '$(call KernelPackage,' ${OPENWRTROOT}/package/kernel | xargs -rn1 sed -i 's/ FILES:=/ XFILES:=/g' || true
+        find ${OPENWRTROOT}/target/linux -name 'modules.mk' | xargs -rn1 sed -i 's/ FILES:=/ XFILES:=/g' || true
+ 
+    - name: Load Custom Configuration
+      run: |
+        cd $OPENWRTROOT
+        cat <<EOF >.config
+        # CONFIG_SIGNED_PACKAGES is not set
+        CONFIG_LUCI_LANG_zh_Hans=y
+        CONFIG_LUCI_LANG_zh-cn=y
+        EOF
+        make defconfig
+        sed -i 's/^CONFIG_PACKAGE_\(.*\)=m$/# CONFIG_PACKAGE_\1 is not set/' .config
+        # grep 'base' feeds.conf.default >> feeds.conf.tmpfile
+        grep 'luci' feeds.conf.default >> feeds.conf.tmpfile
+        mv feeds.conf.tmpfile feeds.conf.default
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        # Remove duplicate packages
+        pushd feeds/luci/applications
+        rm -rf luci-app-adguardhome luci-app-dockerman luci-app-zerotier || true
+        popd
+
+
+    - name: Compile po2lmo
+      run: |
+        cd .github/workflows/po2lmo
+        make && sudo make install
+        
+    - name: Copy & Compile Package
+      run: |
+        cd $OPENWRTROOT
+        echo -e "$(nproc) thread compile"
+        cp -r ../$TARGET package
+        make package/$TARGET/compile -i -j$(nproc) V=99
+        mkdir -p $GITHUB_WORKSPACE/release
+        mv $(ls -1 ./bin/*/*/*/$TARGET*ipk | head -1) $GITHUB_WORKSPACE/release/
+        cd $GITHUB_WORKSPACE/release
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        
+    - name: Generate release tag
+      id: tag
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      run: |
+        echo "release_tag=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
+        echo "release_date=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
+        echo "status=success" >> $GITHUB_OUTPUT
+ 
+    - name: Upload firmware to release
+      uses: softprops/action-gh-release@v1
+      if: steps.tag.outputs.status == 'success' && !cancelled()
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          name: ${{ steps.tag.outputs.release_date }} Automatic Release
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          files: ${{ env.FIRMWARE }}/*
+
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@v2
+      with:
+          retain_days: 1
+          keep_minimum_runs: 1
+
+    - name: Remove old Releases
+      uses: dev-drprasad/delete-older-releases@v0.2.1
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      with:
+          keep_latest: 20
+          delete_tags: true
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Delete Artifacts
+      uses: geekyeggo/delete-artifact@v2
+      with:
+         name: |
+            bin-archive
