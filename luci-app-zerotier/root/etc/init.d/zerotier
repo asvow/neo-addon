@@ -97,7 +97,7 @@ start_instance() {
 		for i in ${zt0}
 		do
 			echo "zt interface $i is started!"
-			if [ -z "$(uci -q get network.zerotier)" ];  then
+			if [ -z "$(uci -q get network.$i)" ];  then
 				uci set network.$i=interface
 				uci set network.$i.proto='none'
 				uci set network.$i.device=$i
