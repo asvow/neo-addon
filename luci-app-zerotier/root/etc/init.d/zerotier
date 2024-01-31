@@ -98,8 +98,11 @@ start_instance() {
 		do
 			echo "zt interface $i is started!"
 			if [ -z "$(uci -q get network.$i)" ];  then
+				zt_ip=$(zerotier-cli listnetworks | awk -v iface="$i" '$8==iface {split($9, ip, "/"); print ip[1]}')
 				uci set network.$i=interface
-				uci set network.$i.proto='none'
+				uci set network.$i.proto='static'
+				uci set network.$i.ipaddr=$zt_ip
+				uci set network.$i.netmask='255.0.0.0'
 				uci set network.$i.device=$i
 			fi
 		done
