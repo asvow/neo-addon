@@ -94,18 +94,25 @@ start_instance() {
 			[ "${count}" -ge 5 ] && { rm /var/run/zerotier.wait.pid; exit 19; }
 		done
 		zt0=$(ifconfig | grep 'zt' | awk '{print $1}')
-		for i in ${zt0}
-		do
-			echo "zt interface $i is started!"
-			if [ -z "$(uci -q get network.$i)" ];  then
-				zt_ip=$(zerotier-cli listnetworks | awk -v iface="$i" '$8==iface {split($9, ip, "/"); print ip[1]}')
-				uci set network.$i=interface
-				uci set network.$i.proto='static'
-				uci set network.$i.ipaddr=$zt_ip
-				uci set network.$i.netmask='255.0.0.0'
-				uci set network.$i.device=$i
+		if [ -z "$(uci -q get network.zerotier)" ];  then				
+			uci set network.zerotier='interface'
+			if [ "$zt0" = *$'\n'* ]; then
+				uci set network.zt_lan='device'
+				uci set network.zt_lan.type='bridge'
+				uci set network.zt_lan.name='zt-lan'
+				for port in "${zt0}"; do
+					uci add_list network.zt_lan.ports=$port
+				done
+				uci set network.zerotier.proto='none'
+				uci set network.zerotier.device='zt-lan'
+			else
+				zt_ip=$(zerotier-cli listnetworks | awk -v iface="$zt0" '$8==iface {split($9, ip, "/"); print ip[1]}')
+				uci set network.zerotier.proto='static'
+				uci set network.zerotier.ipaddr=$zt_ip
+				uci set network.zerotier.netmask='255.0.0.0'
+				uci set network.zerotier.device=$zt0
 			fi
-		done
+		fi
 
 		config_get nat $cfg 'nat'
 		if [ "$nat" == "1" ];  then
@@ -116,12 +123,7 @@ start_instance() {
 				uci set firewall.ztzone.forward='REJECT'
 				uci set firewall.ztzone.masq='1'
 				uci set firewall.ztzone.name='zerotier'
-				if [ "$zt0" = *$'\n'* ]; then
-					printf '%s\n' "$zt0" | IFS=$'\n' read -ra zt0_array
-					uci add_list firewall.ztzone.network ${zt0_array[@]}
-				else
-					uci set firewall.ztzone.network=$zt0
-				fi
+				uci set firewall.ztzone.network='zerotier'
 			fi
 		else
 			uci -q delete firewall.ztzone
@@ -172,12 +174,9 @@ stop_instance() {
 	rm -f /tmp/zero.log
 	local cfg="$1"
 
-	# Remove network interfaces
-	zt0="$(ifconfig | grep 'zt' | awk '{print $1}')"
-	for i in ${zt0}
-	do
-		uci -q delete network.$i
-	done
+	# Remove network settings
+	uci -q delete network.zerotier
+	uci -q delete network.zt_lan
 	
 	# Remove firewall settings
 	uci -q delete firewall.ztzone
