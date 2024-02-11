@@ -84,7 +84,7 @@ jobs:
         ./scripts/feeds install -a
         # Remove duplicate packages
         pushd feeds/luci/applications
-        rm -rf luci-app-adguardhome luci-app-dockerman luci-app-zerotier || true
+        rm -rf luci-app-adguardhome luci-app-dockerman luci-app-tailscale luci-app-zerotier || true
         popd
 
 
@@ -100,7 +100,7 @@ jobs:
         cp -r ../$TARGET package
         make package/$TARGET/compile -i -j$(nproc) V=99
         mkdir -p $GITHUB_WORKSPACE/release
-        mv $(ls -1 ./bin/*/*/*/$TARGET*ipk | head -1) $GITHUB_WORKSPACE/release/
+        mv $(ls -1 ./bin/*/*/*/*${TARGET##*-}*ipk) $GITHUB_WORKSPACE/release/
         cd $GITHUB_WORKSPACE/release
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         
