@@ -35,9 +35,6 @@ jobs:
       UPLOAD_RELEASE: true
       TZ: Asia/Shanghai
     if: github.repository_owner=='asvow'
-    outputs:
-      OPENWRTROOT: ${{ steps.update.outputs.OPENWRTROOT }}
-      FIRMWARE: ${{ steps.compile.outputs.FIRMWARE }}
 
     steps:
     - name: Checkout
@@ -77,16 +74,19 @@ jobs:
         EOF
         make defconfig
         sed -i 's/^CONFIG_PACKAGE_\(.*\)=m$/# CONFIG_PACKAGE_\1 is not set/' .config
-        # grep 'base' feeds.conf.default >> feeds.conf.tmpfile
-        grep 'luci' feeds.conf.default >> feeds.conf.tmpfile
-        mv feeds.conf.tmpfile feeds.conf.default
+        if [[ ${{ env.TARGET }} == *luci* ]]; then
+          grep 'luci' feeds.conf.default >> feeds.conf.tmpfile
+          mv feeds.conf.tmpfile feeds.conf.default
+        else
+          sudo -E apt-get -y update
+          sudo -E apt-get -y install $(curl -fsSL is.gd/depends_ubuntu_2204)
+        fi
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         # Remove duplicate packages
-        pushd feeds/luci/applications
+        pushd feeds/luci/applications || true
         rm -rf luci-app-adguardhome luci-app-dockerman luci-app-tailscale luci-app-zerotier || true
-        popd
-
+        popd || true
 
     - name: Compile po2lmo
       run: |
