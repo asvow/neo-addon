@@ -6,8 +6,8 @@ on:
         type: choice
         description: 'build target package'
         options:
+        - autocore
         - luci-app-adguardhome
-        - luci-app-dockerman
         - luci-app-tailscale
         - luci-app-zerotier
         default: ''
